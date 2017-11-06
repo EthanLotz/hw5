@@ -1,0 +1,60 @@
+---
+title: "HW5_Q3"
+author: "Ethan M. Lotz"
+date: "November 3, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+data(swiss)
+attach(swiss)
+library(ggplot2)
+```
+
+## Question 3
+
+The swiss data set in R includes a standardized fertility measure and socio-economic indicators for each of
+47 French-speaking provinces of Switzerland at about 1888. For the swiss data in R
+```{r}
+#a.) plot an MA plot for the variables Education and Infant.Mortality.
+pseudoCountEdu <- log2(Education)
+pseudoCountIM <- log2(Infant.Mortality)
+M = pseudoCountEdu - pseudoCountIM
+A = (pseudoCountEdu + pseudoCountIM)/2
+df = data.frame(A, M)
+plot(A, M)
+
+
+#b.) Using a span of 40% fit a lowess regression to the MA plot. List the fitted values and overlay the fitted curve on the MA plot.
+lowess40fit <- loess(M ~ A, data = df, span = 0.4, degree = 1)
+lowess40fit
+names(lowess40fit)
+lines(sort(lowess40fit$x), lowess40fit$fitted[order(lowess40fit$x)], col = "red")
+
+#c.) What is the name of the province that has values of Education = 9 and Infant.Mortality = 17.8?
+rownames(swiss[which(swiss$Education == 9 & swiss$Infant.Mortality == 17.8), ])
+
+#d.) Identify this province (Education = 9 and Infant.Mortality = 17.8) on the MA plot using plotting symbol pch=24.
+points(A[36], M[36], pch=24, bg = "grey")
+
+#e.) List the names of the 18 provinces that are nearest neighbors on the MA plot to observation with Education = 9 and Infant.Mortality = 17.8.
+dist <- rank(abs(A - A[36]))
+rownames(swiss[which(dist <= 19 & dist != 1), ])
+
+#f.) Identify the 18 provinces (from part f) on the MA plot using plotting symbol pch=16.
+points(A[dist <= 19 & dist != 1], M[dist <= 19 & dist != 1], pch = 16)
+
+#g.) using the tri-cube weight function, list the weights for each of these 18 nearest neighbors listed in (3f).
+neighborhood <- ifelse((dist <= 19 & dist !=1), 1, 0)
+deltax <- max(dist[neighborhood == 1])
+u <- ifelse(neighborhood==1, dist/deltax, NA)
+weight <- ifelse( u >= 0 & u < 1, (1 - u^3)^3, 0 )
+cbind(dist, neighborhood, u, weight)
+
+#h.) Fit the weighted least squares regression model for this point using these 18 neareast neighbors for the MA plot.
+local <- lm(M ~ A, x = TRUE, weights = weight )
+
+#i.) overlay the fitted weighted least squares regression line on the MA plot.
+abline(local)
+```

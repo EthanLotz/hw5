@@ -1,0 +1,66 @@
+---
+title: "HW5_Q5"
+author: "Ethan M. Lotz"
+date: "November 5, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(affy)
+library(Biobase)
+library(geneplotter)
+library(genefilter)
+```
+
+## Question 5
+
+Read the posted *.CEL files (Affymetrix GeneChip data) into the R programming environment. These two GeneChips were each hybridized with the same RNA, hence, they are technical replicates.
+```{r}
+setwd("C:/Users/lotzem/Desktop/School/Classes/BIOS 567/Homework/Homework 5/hw5/q5/")
+list.celfiles()
+GeneChips <- read.affybatch(filenames = list.celfiles(pattern = "Ref*"))
+pData(GeneChips)
+GeneChips
+```
+
+a.) Produce a boxplot of the PM and MM intensities signals by GeneChip.
+```{r}
+#Chip 1
+boxplot(log2(pm(GeneChips)[, 1]), log2(mm(GeneChips)[, 1]), main="PM and MM 1st Chip")
+
+#Chip 2
+boxplot(log2(pm(GeneChips)[, 2]), log2(mm(GeneChips)[, 2]), main="PM and MM 2nd Chip")
+
+```
+
+b.) Produce the MA plots using only the PM intensities for these GeneChips.
+```{r}
+ma.plot <- function(x, y) {
+  M <- log(x, 2) - log(y, 2)
+  A <- (log(x, 2) + log(y, 2))/2
+  plot(A, M)
+}
+
+ma.plot(pm(GeneChips)[, 1], pm(GeneChips)[, 2])
+```
+
+c.) Apply quantile normalization to this set of data; plot the resulting MA plot for the post-normalized PM data for these GeneChips.
+```{r}
+GeneChips.norm.q <- normalize(GeneChips, method = "quantiles")
+
+ma.plot(pm(GeneChips.norm.q)[, 1], pm(GeneChips.norm.q)[, 2])
+```
+
+d.) Apply invariant set normalization and plot the resulting MA plot for the post- normalized PM data for these GeneChips.
+```{r}
+GeneChips.norm.i <- normalize(GeneChips, method = "invariantset")
+ma.plot(pm(GeneChips.norm.i)[, 1], pm(GeneChips.norm.i)[, 2])
+```
+
+e.) Apply loess normalization and plot the resulting MA plot for the post- normalized PM data for these GeneChips.
+```{r}
+GeneChips.norm.l <- normalize(GeneChips, method = "loess")
+ma.plot(pm(GeneChips.norm.l)[, 1], pm(GeneChips.norm.l)[, 2])
+```
+

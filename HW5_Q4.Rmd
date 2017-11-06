@@ -1,0 +1,98 @@
+---
+title: "HW5_Q4"
+author: "Ethan M. Lotz"
+date: "November 3, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(Biobase)
+library(marray)
+library(affy)
+```
+
+## Question 4
+The three custom spotted array data files GMU1420.txt, GMU1421.txt, and GMU1422.txt are three technical
+replicates whereby the Stratagene Universal Human RNA was hybridized. Read the data into the R
+programming environment. Use code from in-class exercises, change names of the columns containing
+Red/Green intensities as to NOT contain spaces, like: name.Gf = “ch1Intensity”
+
+```{r}
+setwd("C:/Users/lotzem/Desktop/School/Classes/BIOS 567/Homework/Homework 5/hw5/q4/")
+file <- dir(pattern = "txt")[1:3]
+file
+layout<-read.marrayLayout(fname=file[1], ngr=12, ngc=4, nsr=21, nsc=21, skip=21211)	
+info<-read.marrayInfo(fname=file[1], info.id=c(1,6), labels=6, skip=21211)
+raw.data <- read.marrayRaw(file, 
+                           name.Gf="ch1Intensity", name.Gb="ch1Background", 
+                           name.Rf="ch2Intensity", name.Rb="ch2Background", 
+                           layout=layout, gnames=info, skip=21211)
+```
+
+a.) Produce all chip-specific MA plots.
+```{r}
+maPlot(raw.data[,1],x="maA",y="maM",z=NULL,lines.func=NULL)
+maPlot(raw.data[,2],x="maA",y="maM",z=NULL,lines.func=NULL)
+maPlot(raw.data[,3],x="maA",y="maM",z=NULL,lines.func=NULL)
+```
+
+
+b.) For GMU1420.txt, produce a scatterplot of the Green foreground by Green background, as well as a plot of Red foreground by Red background.
+```{r}
+plot(log2(raw.data@maGf[,1]),log2(raw.data@maGb[,1]), ylab="Green Foreground", xlab="Green Background")
+plot(log2(raw.data@maRf[,1]),log2(raw.data@maRb[,1]), ylab="Red Foreground", xlab="Red Background")
+
+```
+
+What, if anything, do these plots suggest?
+
+The range of the red channel is larger than the green channel, but both graphs indicate a constant linear relationship suggesting minimal dye bias.")
+
+c.) Apply constant global normalization to the raw data; plot the MA plots and boxplots by print-tip for this post normalized data.
+```{r}
+raw.data.norm.m <- maNorm(raw.data, norm="median")
+
+maPlot(raw.data.norm.m[,1],x="maA",y="maM",z=NULL,lines.func=NULL, main="Constant Global Normalization-1")
+boxplot(raw.data.norm.m[,1], xvar="maPrintTip", yvar="maM", main="Constant Global Normalization-1")
+
+maPlot(raw.data.norm.m[,2],x="maA",y="maM",z=NULL,lines.func=NULL, main="Constant Global Normalization-2")
+boxplot(raw.data.norm.m[,2], xvar="maPrintTip", yvar="maM", main="Constant Global Normalization-2")
+
+maPlot(raw.data.norm.m[,3],x="maA",y="maM",z=NULL,lines.func=NULL, main="Constant Global Normalization-3")
+maBoxplot(raw.data.norm.m[,3], xvar="maPrintTip", yvar="maM", main="Constant Global Normalization-3")
+```
+
+d.) Apply global loess normalization to the raw data; plot the MA plots and boxplots by print-tip for this post normalized data.
+```{r}
+raw.data.norm.l <- maNorm(raw.data, norm="loess")
+
+maPlot(raw.data.norm.l[,1],x="maA",y="maM",z=NULL,lines.func=NULL, main="Global Loess Normalization-1")
+boxplot(raw.data.norm.l[,1], xvar="maPrintTip", yvar="maM", main="Global Loess Normalization-1")
+
+maPlot(raw.data.norm.l[,2],x="maA",y="maM",z=NULL,lines.func=NULL, main="Global Loess Normalization-2")
+boxplot(raw.data.norm.l[,2], xvar="maPrintTip", yvar="maM", main="Global Loess Normalization-2")
+
+maPlot(raw.data.norm.l[,3],x="maA",y="maM",z=NULL,lines.func=NULL, main="Global Loess Normalization-3")
+boxplot(raw.data.norm.l[,3], xvar="maPrintTip", yvar="maM", main="Global Loess Normalization-3")
+```
+
+e.) Apply print tip loess normalization to the raw data; plot the MA plots and boxplots by print tip for this post normalized data.
+```{r}
+raw.data.norm.p <- maNorm(raw.data, norm="printTipLoess")
+
+maPlot(raw.data.norm.p[,1],x="maA",y="maM",z=NULL,lines.func=NULL, main="Print-Tip Loess Normalization-1")
+boxplot(raw.data.norm.p[,1], xvar="maPrintTip", yvar="maM", main="Print-Tip Loess Normalization-1")
+
+maPlot(raw.data.norm.p[,2],x="maA",y="maM",z=NULL,lines.func=NULL, main="Print-Tip Loess Normalization-2")
+boxplot(raw.data.norm.p[,2], xvar="maPrintTip", yvar="maM", main="Print-Tip Loess Normalization-2")
+
+maPlot(raw.data.norm.p[,3],x="maA",y="maM",z=NULL,lines.func=NULL, main="Print-Tip Loess Normalization-3")
+boxplot(raw.data.norm.p[,3], xvar="maPrintTip", yvar="maM", main="Print-Tip Loess Normalization-3")
+
+```
+
+f.) Write a brief paragraph comparing and contrasting these normalization methods applied to this set of custom spotted array data.
+
+All three methods do a fairly decent job of normalizing the data. Constant global normalization centers the MA plots around zero but does not do a good job of adjusting the skewness of the data. In addition the distribution of the box plots still vary quite a bit. Global Loess normalization does a much better job of eliminating the skewness of the data in the MA plots as well as centering their distribution around zero. However, the boxplots still vary. The Print-Tip Loess normalization does as well of a job as the global Loess normalization technique regarding the MA plots; however, the box plot distributions are much more compact and vary much less compared to the other normalization methods.
+

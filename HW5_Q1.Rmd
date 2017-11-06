@@ -1,0 +1,59 @@
+---
+title: "HW5_Q1"
+author: "Ethan M. Lotz"
+date: "November 2, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(MASS)
+library(ggplot2)
+```
+
+## Question 1
+
+```{r}
+set.seed(123)
+#Generate 50 observations from a bivariate normal distribution
+arrayA <- mvrnorm(n = 50, mu = rep(0,2), Sigma = matrix(c(1, 0.95, 0.95, 1), ncol = 2))
+plot(arrayA[,1], arrayA[,2])
+cor(arrayA[,1], arrayA[,2])
+
+#Concordance Correlation Coefficient
+ConCor <- function(x,y) (2*cov(x,y))/(var(x)+var(y)+(mean(x)-mean(y))^2)
+ConCor(arrayA[,1], arrayA[,2])
+
+set.seed(123)
+
+arrayE <- mvrnorm(n = 50, mu = c(6,8), Sigma = matrix(c(1, 0.95, 0.95, 1), ncol = 2))
+plot(arrayE[,1], arrayE[,2])
+cor(arrayE[,1], arrayE[,2])
+ConCor(arrayE[,1], arrayE[,2])
+
+pseudoCountA <- log2(arrayA + 2)
+pseudoCountE <- log2(arrayE + 2)
+
+MA <- pseudoCountA[,1] - pseudoCountA[,2]
+ME <- pseudoCountE[,1] - pseudoCountE[,2]
+
+AA <- (pseudoCountA[,1] + pseudoCountA[,2])/2
+AE <- (pseudoCountE[,1] + pseudoCountE[,2])/2
+
+dfA <- data.frame(AA, MA)
+dfE <- data.frame(AE, ME)
+
+ggplot(dfA, aes(x = AA, y = MA)) + geom_point(size = 1.5, alpha = 1/5) +
+geom_hline(color = "blue3", yintercept=0) + stat_smooth(se = FALSE, method = "loess", color = "red3")
+
+ggplot(dfE, aes(x = AE, y = ME)) + geom_point(size = 1.5, alpha = 1/5) +
+geom_hline(color = "blue3", yintercept=0) + stat_smooth(se = FALSE, method = "loess", color = "red3")
+```
+
+Discuss whether normalization is needed for these chips, and if so, what type of normalization procedure you would recommend.
+```{r}
+ConCor(arrayA, arrayE)
+cor(arrayA, arrayE)
+```
+
+Ps is high but Pc is very low between the two chips suggesting that normalization is needed. For this array I would recommend quantile normalization.

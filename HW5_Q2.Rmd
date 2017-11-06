@@ -1,0 +1,17 @@
+---
+title: "HW5_Q2"
+author: "Ethan M. Lotz"
+date: "November 3, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Question 2
+
+Suppose you are reviewing a manuscript for publication, and the authors developed the following method for detecting outliers in microarray experiments, where each microarray contains 20,000 gene intensities:
+“Extreme signal intensities (outliers) across all genes are those intensities either greater than or less than the median ± 1.5×IQR, where the IQR is the difference between the third and first quartiles, symbolically, IQR=Q3-Q1.” Suppose in reality your gene intensities are normally distributed. What proportion of gene expression intensities would you expect to declare as outliers? Comment on the appropriateness of this method.
+
+Assuming that our gene intensities are normally distributed we can safely assume that the median is approximately equal to the mean. Using the provided outlier rule, about 20% of the gene expression data would be declared as outliers. Gene expression data is highly sensitive and their inherent variability can be very beneficial for subsequent statistical analyses. This method effectively eliminates a substantial amount of data that could have a meaningful impact on the results and therefore is not an appropriate method for removing outliers.
